@@ -4,10 +4,11 @@
 This is the admin panel for the IRC application.
 
 ## Vulnerabilities
-There are 3 severe vulnerabilities:
+There are 5 severe vulnerabilities:
 - RUBY_EASY_A
 - RUBY_EASY_B
 - RUBY_EASY_C
+- RUBY_EASY_D
 - RUBY_MODERATE
 
 ## In-scope files

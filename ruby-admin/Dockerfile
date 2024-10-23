@@ -4,7 +4,7 @@ FROM ruby:latest
 # Set the working directory
 WORKDIR /app
 
-COPY Gemfile Gemfile.lock .
+COPY Gemfile Gemfile.lock ./
 
 # Install dependencies
 RUN bundle install

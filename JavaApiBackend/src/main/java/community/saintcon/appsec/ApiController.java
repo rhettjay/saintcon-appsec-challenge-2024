@@ -135,7 +135,7 @@ public class ApiController {
         if (room == null || authUser == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        Set<Long> usersInRoom = dbService.getUsersInRoom(authUser.userId());
+        Set<Long> usersInRoom = dbService.getUsersInRoom(roomId);
 
         if (usersInRoom.contains(authUser.userId()) || room.hostId() == authUser.userId()) {
             return new ResponseEntity<>(room, HttpStatus.OK);

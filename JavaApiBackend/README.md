@@ -6,7 +6,8 @@ It should be noted that for the purposes of this challenge, the server is intend
 
 ## Vulnerabilities
 There are 6 vulnerabilities:
-- JAVA_EASY (SQL injection)
+- JAVA_EASY_A (SQL injection)
+- JAVA_EASY_B
 - JAVA_MODERATE_A
 - JAVA_MODERATE_B
 - JAVA_MODERATE_C

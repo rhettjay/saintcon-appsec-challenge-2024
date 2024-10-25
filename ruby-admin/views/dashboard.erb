@@ -108,7 +108,7 @@
             <% @users.each do |user| %>
                 <tr>
                     <td><%= user['id'] %></td>
-                    <td <% if user['banned'] %>style="color: red;"<% end %>><%= user['username'] %></td>
+                    <td <% if user['banned'] %>style="color: red;"<% end %>><%= h(user['username']) %></td>
                     <td><%= user['role'] %></td>
                     <td>
                         <% if user['banned'] %>

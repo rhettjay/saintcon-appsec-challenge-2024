@@ -7,6 +7,7 @@ require 'sinatra'
 require 'securerandom'
 require 'pg'
 require 'logger'
+include ERB::Util
 
 require_relative 'config'
 

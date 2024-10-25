@@ -45,6 +45,7 @@ app.MapGet("/", async (HttpContext context) =>
         {
             context.Response.Headers.Add("Content-Disposition", $"attachment; filename=\"{fullPath}\"");
         }
+        context.Response.Headers.Add("Content-Security-Policy", "default-src 'none';");
         await context.Response.SendFileAsync(fullPath);
     }
     catch (FileNotFoundException)

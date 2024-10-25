@@ -58,7 +58,11 @@ public class DbService {
 
     public User getUser(String username) {
         ArrayList<User> results = executeQuery(
-                (conn) -> conn.prepareStatement(String.format("SELECT id, name, username, password_hash, banned FROM users WHERE username='%s'", username)),
+                (conn) -> {
+                    PreparedStatement statement = conn.prepareStatement("SELECT id, name, username, password_hash, banned FROM users WHERE username=?");
+                    statement.setString(1, username);
+                    return statement;
+                },
                 this::userParser);
         if (results != null && results.size() == 1) {
             return results.get(0);

@@ -190,11 +190,11 @@ public class ApiController {
         if (newUser == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        Set<Long> usersInRoom = dbService.getUsersInRoom(addUserToRoomRequest.roomId());
+        Set<Long> usersInRoom = dbService.getUsersInRoom(roomId);
         if (usersInRoom.size() >= 5){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
-        Long userId = dbService.addUserToRoom(newUser.userId(), addUserToRoomRequest.roomId());
+        Long userId = dbService.addUserToRoom(newUser.userId(), roomId);
         if (userId != newUser.userId()) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

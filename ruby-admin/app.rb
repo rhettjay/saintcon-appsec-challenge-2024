@@ -64,6 +64,7 @@ get '/admin/logout' do
 end
 
 get '/admin/dashboard' do
+  halt 403, 'User is unauthorized' if session[:role] != 'admin'
   users = db.exec('SELECT * FROM users;')
 
   @users = users.map do |user|

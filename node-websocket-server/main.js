@@ -140,17 +140,17 @@ wss.on('connection', (client, req) => {
 
         let doc = { ...authData };
 
-        merge(msg, doc);
+        merge(doc, msg);
 
-        console.log("Distributing message: " + JSON.stringify(doc));
+        console.log("Distributing message: " + JSON.stringify(msg));
 
         // Save chats
-        insert(doc);
+        insert(msg);
 
         // Send chats to all other relevant clients
-        connections.get(doc.room).forEach(c => {
+        connections.get(msg.room).forEach(c => {
             if (c.readyState === WebSocket.OPEN) {
-                c.send(JSON.stringify([doc]));
+                c.send(JSON.stringify([msg]));
             }
         });
     })

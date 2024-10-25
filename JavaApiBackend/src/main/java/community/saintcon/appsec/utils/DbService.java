@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 @Service
 public class DbService {
+    private final Object mutex = new Object();
 
     @Value("${spring.datasource.url}")
     private String DB_URL;
@@ -275,18 +276,24 @@ public class DbService {
     }
 
     public Long addUserToRoom(long userId, long roomId) {
-        ArrayList<Long> results = executeQuery(
-                (Connection conn) -> {
-                    PreparedStatement statement = conn.prepareStatement("INSERT INTO room_members(user_id, room_id) VALUES (?, ?) RETURNING user_id");
-                    statement.setLong(1, userId);
-                    statement.setLong(2, roomId);
-                    return statement;
-                },
-                (resultSet) -> resultSet.getLong("user_id"));
-        if (results != null && !results.isEmpty()) {
-            return results.get(0);
+        synchronized (mutex) {
+            Set<Long> usersInRoom = this.getUsersInRoom(roomId);
+            if (usersInRoom.size() >= 5){
+                return null;
+            }
+            ArrayList<Long> results = executeQuery(
+                    (Connection conn) -> {
+                        PreparedStatement statement = conn.prepareStatement("INSERT INTO room_members(user_id, room_id) VALUES (?, ?) RETURNING user_id");
+                        statement.setLong(1, userId);
+                        statement.setLong(2, roomId);
+                        return statement;
+                    },
+                    (resultSet) -> resultSet.getLong("user_id"));
+            if (results != null && !results.isEmpty()) {
+                return results.get(0);
+            }
+            return null;
         }
-        return null;
     }
 
     public Boolean removeUserFromRoom(long userId, long roomId) {

@@ -46,7 +46,7 @@ async function getLastMessages(roomId, count) {
         client = new MongoClient(mongoURL);
         await client.connect()
         const db = client.db("messages");
-        const q = JSON.parse(`{"find": "messages", "filter": {"room": "${roomId}"}, "limit": ${count}, "sort":{"timestamp":-1}}`);
+        const q = {find: "messages", filter: {room: roomId.toString()}, limit: parseInt(count), sort:{timestamp:-1}};
         const result = await db.command(q);
         const r = result.cursor.firstBatch;
         return r;

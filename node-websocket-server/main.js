@@ -7,19 +7,6 @@ var secretKey = fs.readFileSync('/run/secrets/app_secret', 'utf8');
 
 const mongoURL = "mongodb://mongodb:27017"
 
-function merge(target, source) {
-    for (const attr in target) {
-      if (
-        typeof source[attr] === "object" &&
-        typeof target[attr] === "object"
-      ) {
-        merge(source[attr], target[attr])
-      } else {
-        source[attr] = target[attr]
-      }
-    }
-  }
-
 async function insert(doc) {
     let client = null;
     try {
@@ -138,19 +125,17 @@ wss.on('connection', (client, req) => {
             return;
         }
 
-        let doc = { ...authData };
+        let doc = {...msg, ...authData};
 
-        merge(doc, msg);
-
-        console.log("Distributing message: " + JSON.stringify(msg));
+        console.log("Distributing message: " + JSON.stringify(doc));
 
         // Save chats
-        insert(msg);
+        insert(doc);
 
         // Send chats to all other relevant clients
-        connections.get(msg.room).forEach(c => {
+        connections.get(doc.room).forEach(c => {
             if (c.readyState === WebSocket.OPEN) {
-                c.send(JSON.stringify([msg]));
+                c.send(JSON.stringify([doc]));
             }
         });
     })

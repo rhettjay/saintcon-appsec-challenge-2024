@@ -153,8 +153,15 @@ public class ApiController {
         if (user == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        Room room = dbService.updateRoom(roomId, updateRoomRequest.name(), updateRoomRequest.hostId());
-        return new ResponseEntity<>(room, HttpStatus.CREATED);
+
+        // check that user is the host of the room
+        Room room = dbService.getRoom(roomId);
+        if (room == null || room.hostId() != user.userId()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        Room newRoom = dbService.updateRoom(roomId, updateRoomRequest.name(), updateRoomRequest.hostId());
+        return new ResponseEntity<>(newRoom, HttpStatus.CREATED);
     }
 
     @GetMapping(path = "/rooms/{id}/users",

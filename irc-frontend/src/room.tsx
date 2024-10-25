@@ -95,7 +95,7 @@ function RoomView() {
       const fileId = `${uid}.${ext}`;
       uploadFile(fileInputRef.current.files[0], fileId);
       msg["fileName"] = fileName;
-      msg["fileLocation"] = "/files/?path=" + fileId;
+      msg["fileLocation"] = fileId;
     }
     ws.send(JSON.stringify(msg));
     setInput("");
@@ -293,7 +293,7 @@ function RoomView() {
                 {users.get(msg.userId)?.username || "NoUserProvided"}:
               </span>{" "}
               {msg.text ?? "invaid message format"}
-              {msg.fileLocation && <div><span style="padding:2px"><a href={msg.fileLocation}>{msg.fileName}</a></span>{isImage(msg.fileName) && <div><img src={msg.fileLocation} style="width:100%;max-width:200px"></img></div>}</div>}
+              {msg.fileLocation && <div><span style="padding:2px"><a href={"/files/?path=" + msg.fileLocation}>{msg.fileName}</a></span>{isImage(msg.fileName) && <div><img src={"/files/?path=" + msg.fileLocation} style="width:100%;max-width:200px"></img></div>}</div> }
             </div>
           ))}
           <div />

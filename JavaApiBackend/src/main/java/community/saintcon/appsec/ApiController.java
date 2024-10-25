@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.Set;
 
-@CrossOrigin(originPatterns="*", allowedHeaders="*", allowCredentials="true")
+@CrossOrigin(originPatterns={"http://localhost:[*]", "http://irc.local:[*]"}, allowedHeaders="*", allowCredentials="true")
 @RestController
 public class ApiController {
     @Autowired

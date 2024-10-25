@@ -38,7 +38,7 @@ post '/admin/login' do
   password = params[:password]
 
   if valid_credentials?(username, password)
-    user_data = db.exec("SELECT * FROM users WHERE username = '#{username}'")
+    user_data = db.exec_params("SELECT * FROM users WHERE username = $1", [username])
     if user_data.first['role'] != 'admin'
       return erb :login, locals: { error: 'You must be an admin to view the admin dashboard' }
     end

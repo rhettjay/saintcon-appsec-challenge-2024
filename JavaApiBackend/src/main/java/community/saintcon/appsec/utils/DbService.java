@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import community.saintcon.appsec.Entities;
 import community.saintcon.appsec.model.Room;
 import community.saintcon.appsec.model.User;
+import community.saintcon.appsec.model.UserWithPassword;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,9 +45,17 @@ public class DbService {
         long id = rs.getLong("id");
         String name = rs.getString("name");
         String username = rs.getString("username");
+        boolean banned = rs.getBoolean("banned");
+        return new User(id, name, username, banned);
+    }
+
+    private UserWithPassword userWithPasswordParser(ResultSet rs) throws SQLException {
+        long id = rs.getLong("id");
+        String name = rs.getString("name");
+        String username = rs.getString("username");
         String password = rs.getString("password_hash");
         boolean banned = rs.getBoolean("banned");
-        return new User(id, name, username, password, banned);
+        return new UserWithPassword(id, name, username, password, banned);
     }
 
     private Room roomParser(ResultSet rs) throws SQLException {
@@ -70,14 +79,42 @@ public class DbService {
         return null;
     }
 
+    public UserWithPassword getUserWithPassword(String username) {
+        ArrayList<UserWithPassword> results = executeQuery(
+                (conn) -> {
+                    PreparedStatement statement = conn.prepareStatement("SELECT id, name, username, password_hash, banned FROM users WHERE username=?");
+                    statement.setString(1, username);
+                    return statement;
+                },
+                this::userWithPasswordParser);
+        if (results != null && results.size() == 1) {
+            return results.get(0);
+        }
+        return null;
+    }
+
     public User getUser(long userId) {
         ArrayList<User> results = executeQuery(
+                (conn) -> {
+                    PreparedStatement statement = conn.prepareStatement("SELECT id, name, username, banned FROM users WHERE id=?");
+                    statement.setLong(1, userId);
+                    return statement;
+                },
+                this::userParser);
+        if (results != null && results.size() == 1) {
+            return results.get(0);
+        }
+        return null;
+    }
+
+    public UserWithPassword getUserWithPassword(long userId) {
+        ArrayList<UserWithPassword> results = executeQuery(
                 (conn) -> {
                     PreparedStatement statement = conn.prepareStatement("SELECT id, name, username, password_hash, banned FROM users WHERE id=?");
                     statement.setLong(1, userId);
                     return statement;
                 },
-                this::userParser);
+                this::userWithPasswordParser);
         if (results != null && results.size() == 1) {
             return results.get(0);
         }
@@ -105,7 +142,7 @@ public class DbService {
                 },
                 (resultSet -> resultSet.getLong("id")));
         if (userIds != null && !userIds.isEmpty()) {
-            return new User(userIds.get(0), name, username, passwordHash, false);
+            return new User(userIds.get(0), name, username, false);
         }
         return null;
     }
@@ -131,7 +168,7 @@ public class DbService {
         return null;
     }
 
-    public User updateUser(User user, Entities.UpdateUserRequest updateUserRequest) {
+    public User updateUser(UserWithPassword user, Entities.UpdateUserRequest updateUserRequest) {
         String password = updateUserRequest.password() == null ? user.password() : cryptoUtil.hashPassword(updateUserRequest.password());
         String name = updateUserRequest.name() == null ? user.name() : updateUserRequest.name();
         String username = updateUserRequest.username() == null ? user.username() : updateUserRequest.username();

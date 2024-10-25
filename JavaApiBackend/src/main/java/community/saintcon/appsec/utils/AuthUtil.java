@@ -1,6 +1,7 @@
 package community.saintcon.appsec.utils;
 
 import community.saintcon.appsec.model.User;
+import community.saintcon.appsec.model.UserWithPassword;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,6 +41,18 @@ public class AuthUtil {
             return null;
         }
         return user;
+    }
+
+    public UserWithPassword getAuthenticatedUserWithPassword(HttpServletRequest request) {
+        Cookie authToken = WebUtils.getCookie(request, AUTH_COOKIE_NAME);
+        if (authToken == null) {
+            return null;
+        }
+        Long userId = jwtUtil.getValidatedClaimId(authToken.getValue());
+        if (userId == null) {
+            return null;
+        }
+        return dbService.getUserWithPassword(userId);
     }
 
     public void setAuthenticatedUser(HttpServletResponse response, long userId) {

@@ -2,6 +2,7 @@ package community.saintcon.appsec;
 
 import community.saintcon.appsec.model.Room;
 import community.saintcon.appsec.model.User;
+import community.saintcon.appsec.model.UserWithPassword;
 import community.saintcon.appsec.utils.AuthUtil;
 import community.saintcon.appsec.utils.CryptoUtil;
 import community.saintcon.appsec.utils.DbService;
@@ -43,12 +44,12 @@ public class ApiController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> authenticate(@RequestBody Entities.AuthenticationRequest authRequest, HttpServletResponse response) {
-        User user = dbService.getUser(authRequest.username());
-        if (user == null || !cryptoUtil.comparePassword(authRequest.password(), user.password()) || user.banned()) {
+        UserWithPassword userWithPassword = dbService.getUserWithPassword(authRequest.username());
+        if (userWithPassword == null || !cryptoUtil.comparePassword(authRequest.password(), userWithPassword.password()) || userWithPassword.banned()) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        authUtil.setAuthenticatedUser(response, user.userId());
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        authUtil.setAuthenticatedUser(response, userWithPassword.userId());
+        return new ResponseEntity<>(userWithPassword.toUser(), HttpStatus.OK);
     }
 
     @PostMapping(path = "/users",
@@ -94,7 +95,7 @@ public class ApiController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> updateUser(@RequestBody Entities.UpdateUserRequest updateUserRequest, HttpServletRequest request, @PathVariable("id") long userId) {
-        User user = authUtil.getAuthenticatedUser(request);
+        UserWithPassword user = authUtil.getAuthenticatedUserWithPassword(request);
         if (user == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } else if (user.userId() != userId) {

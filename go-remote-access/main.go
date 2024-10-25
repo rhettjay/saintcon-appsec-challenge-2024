@@ -23,11 +23,9 @@ func readAuthFile() map[string]string {
 }
 
 // My professor said not to use global variables but I think I'm fine here
-var isAuthed = false
-var authedUsername = ""
 var userMap = readAuthFile()
 
-func authUser(c net.Conn) bool {
+func authUser(c net.Conn) string {
 	for {
 		c.Write([]byte("Username: "))
 		username, _ := bufio.NewReader(c).ReadString('\n')
@@ -37,8 +35,7 @@ func authUser(c net.Conn) bool {
 		password = strings.TrimSpace(password)
 		if userMap[username] == password {
 			c.Write([]byte("successful auth. Can run commands now.\n" + username + "$ "))
-			authedUsername = username
-			return true
+			return username
 		}
 	}
 }
@@ -56,31 +53,23 @@ func execute(cmd string) string {
 
 func handleConnection(c net.Conn) {
 	defer c.Close()
-	if !isAuthed {
-		authResult := authUser(c)
-		isAuthed = authResult
-	}
-	if isAuthed {
-		for {
-			line, err := bufio.NewReader(c).ReadString('\n')
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-
-			cmd := strings.TrimSpace(line)
-			if cmd == "exit!" {
-				isAuthed = false
-				authedUsername = ""
-				return
-			}
-
-			result := execute(cmd)
-			c.Write([]byte(result))
-			c.Write([]byte(authedUsername + "$ "))
+	var authedUsername = authUser(c)
+	for {
+		line, err := bufio.NewReader(c).ReadString('\n')
+		if err != nil {
+			fmt.Println(err)
+			return
 		}
-	} else {
-		return
+
+		cmd := strings.TrimSpace(line)
+		if cmd == "exit!" {
+			authedUsername = ""
+			return
+		}
+
+		result := execute(cmd)
+		c.Write([]byte(result))
+		c.Write([]byte(authedUsername + "$ "))
 	}
 }
 

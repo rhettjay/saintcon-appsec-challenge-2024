@@ -17,5 +17,3 @@ CREATE TABLE IF NOT EXISTS room_members (
     user_id int REFERENCES users(id) ON DELETE CASCADE,
     room_id int REFERENCES rooms(id) ON DELETE CASCADE
 );
-
-INSERT INTO users(username, name, password_hash, role) VALUES ('admin', 'admin', '$2a$10$hZ69m0nOXtgaEBuVB2HRm.I3Tq6rjogoFgzXHthvoYMIcCZAfjysS', 'admin');

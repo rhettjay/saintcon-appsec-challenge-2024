@@ -32,7 +32,7 @@ public class AuthUtil {
         if (authToken == null) {
             return null;
         }
-        Long userId = jwtUtil.getValidatedClaimId(authToken.getValue());
+        Long userId = jwtUtil.getValidatedClaimId(authToken.getValue(), "U");
         if (userId == null) {
             return null;
         }
@@ -48,7 +48,7 @@ public class AuthUtil {
         if (authToken == null) {
             return null;
         }
-        Long userId = jwtUtil.getValidatedClaimId(authToken.getValue());
+        Long userId = jwtUtil.getValidatedClaimId(authToken.getValue(), "U");
         if (userId == null) {
             return null;
         }
@@ -56,7 +56,7 @@ public class AuthUtil {
     }
 
     public void setAuthenticatedUser(HttpServletResponse response, long userId) {
-        final Cookie cookie = new Cookie(AUTH_COOKIE_NAME, jwtUtil.generateToken(userId, AUTH_TOKEN_TTL));
+        final Cookie cookie = new Cookie(AUTH_COOKIE_NAME, jwtUtil.generateToken(userId, AUTH_TOKEN_TTL, "U"));
         cookie.setSecure(isProd);
         cookie.setHttpOnly(true);
         cookie.setMaxAge(60 * 60 * 24 * 30);

@@ -3,6 +3,7 @@ package community.saintcon.appsec.utils;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.auth0.jwt.interfaces.Payload;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -25,13 +26,18 @@ public class JwtUtil {
         return br.readLine();
     }
 
-    public String generateToken(Long claimId, long expiryInMinutes) {
-        return createToken(claimId.toString(), expiryInMinutes);
+    public String generateToken(Long claimId, long expiryInMinutes, String prefix) {
+        return createToken(prefix + "-" + claimId.toString(), expiryInMinutes);
     }
 
-    public Long getValidatedClaimId(String token) {
+    public Long getValidatedClaimId(String token, String prefix) {
         if (!isTokenExpired(token)) {
-            return getClaimFromToken(token, jwt -> Long.parseLong(jwt.getSubject()));
+            String subject = getClaimFromToken(token, Payload::getSubject);
+            String[] parts = subject.split("-");
+            if (!parts[0].equals(prefix) || parts.length < 2) {
+                return null;
+            }
+            return Long.parseLong(parts[1]);
         }
         return null;
     }

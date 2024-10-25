@@ -74,12 +74,23 @@ function auth(req) {
         let data = jwt.verify(roomToken, secretKey, options = {
             algorithms: ['HS256'],
         });
-        results["room"] = data.sub;
+
+        let split = data.sub.split("-");
+        if (split.length < 2 || split[0] != "R") {
+            return null;
+        }
+        results["room"] = split[1];
 
         data = jwt.verify(authToken, secretKey, options = {
             algorithms: ['HS256'],
         });
-        results["userId"] = data.sub;
+
+        split = data.sub.split("-");
+        if (split.length < 2 || split[0] != "U") {
+            return null;
+        }
+
+        results["userId"] = split[1];
         console.log("successful auth for user " + results["userId"] + " and room " + results["room"]);
         return results;
     } catch (e) {

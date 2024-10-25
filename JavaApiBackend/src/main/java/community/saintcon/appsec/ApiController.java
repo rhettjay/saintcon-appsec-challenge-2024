@@ -252,7 +252,7 @@ public class ApiController {
         if (roomOwner != user.userId() && !roomMembers.contains(user.userId())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        String token = jwtUtil.generateToken(roomId, 1);
+        String token = jwtUtil.generateToken(roomId, 1, "R");
         return new ResponseEntity<>(token, HttpStatus.OK);
     }
 }

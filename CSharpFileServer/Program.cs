@@ -19,21 +19,34 @@ app.MapGet("/", async (HttpContext context) =>
         return;
     }
     filePath = WebUtility.UrlDecode(filePath);
+    var safeBaseDirectory = Path.Combine(Directory.GetCurrentDirectory(), "upload");
+    if (!Directory.Exists(safeBaseDirectory))
+    {
+        Directory.CreateDirectory(safeBaseDirectory);
+    }
+    var fullPath = Path.GetFullPath(Path.Combine(safeBaseDirectory, filePath));
+    if (!fullPath.StartsWith(safeBaseDirectory))
+    {
+        context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+        await context.Response.WriteAsync("Invalid file path.");
+        return;
+    }
     try
     {
         var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
 
         var contentType = "";
-        if (!provider.TryGetContentType(filePath, out contentType))
+        if (!provider.TryGetContentType(fullPath, out contentType))
         {
             contentType = "application/octet-stream"; // fallback content type
         }
         context.Response.ContentType = contentType;
         if (!contentType.StartsWith("image/"))
         {
-            context.Response.Headers.Add("Content-Disposition", $"attachment; filename=\"{filePath}\"");
+            context.Response.Headers.Add("Content-Disposition", $"attachment; filename=\"{fullPath}\"");
         }
-        await context.Response.SendFileAsync(filePath);
+        context.Response.Headers.Add("Content-Security-Policy", "default-src 'none';");
+        await context.Response.SendFileAsync(fullPath);
     }
     catch (FileNotFoundException)
     {
@@ -67,13 +80,36 @@ app.MapPost("/upload", async (HttpContext context) =>
         await context.Response.WriteAsync("Uploaded file size exceeds the allowed limit.");
         return;
     }
-    var filename = context.Request.Form["filename"].ToString();
 
-    // Sanitize the file name to prevent path traversal attacks
-    var uploadPath = filename.Replace("../", "");
+    var userFilename = Path.GetFileName(context.Request.Form["filename"].ToString());
+    if (string.IsNullOrWhiteSpace(userFilename))
+    {
+        context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+        await context.Response.WriteAsync("Invalid file name.");
+        return;
+    }
+
+    var safeUploadDirectory = Path.Combine(Directory.GetCurrentDirectory(), "upload");
+
+    if (!Directory.Exists(safeUploadDirectory))
+    {
+        Directory.CreateDirectory(safeUploadDirectory);
+    }
+
+    // Combine the sanitized filename with the upload directory
+    var uploadPath = Path.Combine(safeUploadDirectory, userFilename);
 
     try
     {
+        // Check that the resolved path is within the allowed directory (prevents path traversal)
+        if (!uploadPath.StartsWith(safeUploadDirectory))
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            await context.Response.WriteAsync("Invalid file path.");
+            return;
+        }
+
+        // Save the uploaded file to the secure upload directory
         using var stream = new FileStream(uploadPath, FileMode.Create);
         await file.CopyToAsync(stream);
 

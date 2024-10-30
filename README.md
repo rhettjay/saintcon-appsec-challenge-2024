@@ -1,3 +1,5 @@
+> [!IMPORTANT]
+> This is a [detached fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/detaching-a-fork) of the [saintcon-appsec-challenge-2024](https://github.com/smanesse/saintcon-appsec-challenge-2024). It is detached in order to prevent disturbing the upstream repo with our pushes / PRs as it is unlikely any of the revisions we introduce will be of benefit to them. All credit to this repo goes to creators of the original repository.
 # SAINTCON 2024 AppSec Challenge
 
 **Please read this README thoroughly. It will answer many of your questions.**
